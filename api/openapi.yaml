@@ -1,0 +1,345 @@
+openapi: 3.0.3
+info:
+  description: usermng api
+  title: usermng
+  version: 1.0.0
+servers:
+- url: https://www.example.com/api/open/v1
+tags:
+- description: Operations about login
+  name: user
+- description: Operations about usergroup
+  name: usergroup
+paths:
+  /login:
+    post:
+      description: This API allows user to login into the system
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/login_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/login_200_response'
+          description: Login successful
+        "400":
+          description: Bad request. User ID must be an integer and pass all validation.
+        "401":
+          description: Unauthorized. User credentials are not valid.
+        "500":
+          description: Internal Server Error.
+      summary: User login
+      tags:
+      - user
+  /token-info:
+    get:
+      description: This API allows users to get token info.
+      operationId: getTokenInfo
+      parameters:
+      - explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenInfo'
+          description: Token info retrieved
+        "401":
+          description: Unauthorized. User credentials are not valid.
+        "500":
+          description: Internal Server Error.
+      summary: Get token info
+      tags:
+      - user
+  /signup:
+    post:
+      description: This API allows users to sign up for a new account.
+      operationId: signup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signup_201_response'
+          description: Signup successful
+        "400":
+          description: Bad request. User ID must be an integer and pass all validation.
+        "409":
+          description: Conflict. User already exists.
+        "500":
+          description: Internal Server Error.
+      summary: User signup
+      tags:
+      - user
+  /resetpwd:
+    post:
+      description: This API allows users to reset password.
+      operationId: resetPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+        required: true
+      responses:
+        "200":
+          description: Password reset successful
+        "400":
+          description: Bad request. User ID must be an integer and pass all validation.
+        "401":
+          description: Unauthorized. User credentials are not valid.
+        "500":
+          description: Internal Server Error.
+      summary: Reset password
+      tags:
+      - user
+  /user:
+    put:
+      description: This API allows users to update their account.
+      operationId: updateUser
+      parameters:
+      - explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+        required: true
+      responses:
+        "200":
+          description: User updated
+      summary: Update user
+      tags:
+      - user
+  /device:
+    post:
+      description: This API allows users to create device.
+      operationId: createDevice
+      parameters:
+      - explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/createDevice_201_response'
+          description: Device created
+        "500":
+          description: Internal Server Error.
+      summary: Create device
+      tags:
+      - user
+  /device/bind:
+    post:
+      description: This API allows a user to bind a device.
+      operationId: bindDevice
+      parameters:
+      - explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bindDevice_request'
+        required: true
+      responses:
+        "200":
+          description: Device binded
+        "500":
+          description: Internal Server Error.
+      summary: user bind a device
+      tags:
+      - user
+  /device/unbind:
+    post:
+      description: This API allows a user to unbind a device.
+      operationId: unbindDevice
+      parameters:
+      - explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Device unbinded
+        "500":
+          description: Internal Server Error.
+      summary: user unbind a device
+      tags:
+      - user
+components:
+  parameters:
+    Authorization:
+      explode: false
+      in: header
+      name: Authorization
+      required: true
+      schema:
+        type: string
+      style: simple
+  schemas:
+    Error:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    CreateUserRequest:
+      example:
+        password: password
+        username: username
+      properties:
+        username:
+          maxLength: 20
+          minLength: 1
+          type: string
+        password:
+          maxLength: 20
+          minLength: 1
+          type: string
+      required:
+      - password
+      - username
+      type: object
+    ResetPasswordRequest:
+      example:
+        password: password
+        newPassword: newPassword
+        confirmPassword: confirmPassword
+        username: username
+      properties:
+        username:
+          maxLength: 20
+          minLength: 1
+          type: string
+        password:
+          maxLength: 20
+          minLength: 1
+          type: string
+        newPassword:
+          maxLength: 20
+          minLength: 1
+          type: string
+        confirmPassword:
+          maxLength: 20
+          minLength: 1
+          type: string
+      required:
+      - confirmPassword
+      - newPassword
+      - password
+      - username
+      type: object
+    UpdateUserRequest:
+      example:
+        displayName: displayName
+      properties:
+        displayName:
+          maxLength: 20
+          minLength: 1
+          type: string
+      type: object
+    TokenInfo:
+      example:
+        expiredAt: 2000-01-23T04:56:07.000+00:00
+        username: username
+      properties:
+        username:
+          type: string
+        expiredAt:
+          format: date-time
+          type: string
+      type: object
+    login_request:
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+      - password
+      - username
+      type: object
+    login_200_response:
+      example:
+        token: token
+      properties:
+        token:
+          description: The token to be used for subsequent authenticated requests.
+          type: string
+      type: object
+    signup_201_response:
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        username: username
+      properties:
+        id:
+          format: uuid
+          type: string
+        username:
+          type: string
+      type: object
+    createDevice_201_response:
+      example:
+        password: password
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        token: token
+      properties:
+        id:
+          format: uuid
+          type: string
+        token:
+          type: string
+        password:
+          type: string
+      type: object
+    bindDevice_request:
+      properties:
+        deviceId:
+          format: uuid
+          type: string
+      required:
+      - deviceId
+      type: object
